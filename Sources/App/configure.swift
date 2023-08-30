@@ -17,8 +17,10 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
     
-    try app.autoMigrate().wait()
-
+    app.migrations.add(CreateGonka())
+//    try app.autoMigrate().get()
+    
+    
     // register routes
     try routes(app)
 }

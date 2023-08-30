@@ -23,8 +23,8 @@ x-shared_environment: &shared_environment
   LOG_LEVEL: ${LOG_LEVEL:-debug}
   DATABASE_HOST: db
   DATABASE_NAME: vapor_database
-  DATABASE_USERNAME: vapor_username
-  DATABASE_PASSWORD: vapor_password
+  DATABASE_USERNAME: gonka_username
+  DATABASE_PASSWORD: gonka_password
   
 services:
   app:
@@ -67,8 +67,8 @@ services:
       - db_data:/var/lib/postgresql/data/pgdata
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_USER: vapor_username
-      POSTGRES_PASSWORD: vapor_password
-      POSTGRES_DB: vapor_database
+      POSTGRES_USER: gonka_username
+      POSTGRES_PASSWORD: gonka_password
+      POSTGRES_DB: gonka_database
     ports:
       - '5432:5432'

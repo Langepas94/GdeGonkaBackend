@@ -14,7 +14,7 @@ struct CreateGonka: Migration {
         database.schema("allRacings")
             .id()
             .field("name", .string, .required)
-            .field("address", .string, .required)
+            .field("city", .string, .required)
             .field("description", .string)
             .field("date", .string, .required)
             .field("geo", .string, .required)

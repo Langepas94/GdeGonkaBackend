@@ -8,10 +8,11 @@
 import Fluent
 import Vapor
 
-struct CreateGonka: Migration {
+struct CreateGonka: AsyncMigration {
     
-    func prepare(on database: FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("allRacings")
+    func prepare(on database: FluentKit.Database) async throws {
+        
+        let scheme = database.schema("allRacings")
             .id()
             .field("name", .string, .required)
             .field("city", .string, .required)
@@ -19,11 +20,14 @@ struct CreateGonka: Migration {
             .field("date", .string, .required)
             .field("geo", .string, .required)
             .field("image", .string)
-            .create()
+        
+          try await scheme.create()
     }
     
-    func revert(on database: FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("allRacings").delete()
+    func revert(on database: FluentKit.Database) async throws {
+        
+        let scheme = database.schema("allRacings")
+        try await scheme.delete()
     }
     
 }

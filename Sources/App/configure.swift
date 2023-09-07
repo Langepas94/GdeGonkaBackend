@@ -19,6 +19,7 @@ public func configure(_ app: Application) async throws {
     
     
     app.migrations.add(CreateGonka())
+    app.migrations.add(CreateUser())
     try await app.autoMigrate()
     
     

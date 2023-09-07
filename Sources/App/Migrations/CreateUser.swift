@@ -21,8 +21,8 @@ struct CreateUser: AsyncMigration {
             .field("password", .string)
             .field("role", .string, .required)
             .field("profilePic", .string)
-        
-          try await scheme.create()
+            .unique(on: "login")
+        try await scheme.create()
     }
     
 }

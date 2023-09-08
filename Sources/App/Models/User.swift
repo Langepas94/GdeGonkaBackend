@@ -43,6 +43,20 @@ extension User {
     }
 }
 
+// для аутентификации
+extension User: ModelAuthenticatable {
+    
+    static let usernameKey = \User.$login
+    
+    static var passwordHashKey = \User.$password
+    
+    func verify(password: String) throws -> Bool {
+        try Bcrypt.verify(password, created: self.password)
+    }
+    
+    
+}
+
 enum UserRole: String {
     case admin = "admin"
     case basicUser = "basicUser"

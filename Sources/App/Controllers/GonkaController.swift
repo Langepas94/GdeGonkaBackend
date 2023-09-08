@@ -13,9 +13,14 @@ struct GonkaController: RouteCollection {
     // register all route's handlers
     func boot(routes: Vapor.RoutesBuilder) throws {
         let raceGroup = routes.grouped("allraces")
-        raceGroup.post(use: createRacing)
         raceGroup.get(use: allRacings)
         raceGroup.get(":cityName", use: getRacesByCity)
+        
+        // защита через аутентификатор и мидлвор
+        let basicMW = User.authenticator()
+        let guardMW = User.guardMiddleware()
+        let protected = raceGroup.grouped(basicMW, guardMW)
+        protected.post(use: createRacing)
     }
     
     func createRacing(_ req: Request) async throws -> GonkaModel {

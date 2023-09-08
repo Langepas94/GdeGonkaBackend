@@ -21,7 +21,11 @@ struct GonkaController: RouteCollection {
         let guardMW = User.guardMiddleware()
         let protected = raceGroup.grouped(basicMW, guardMW)
         protected.post(use: createRacing)
+        protected.delete(":cityName", use: deleteRace)
+        protected.put(":cityName", use: updateRace)
     }
+    
+    // MARK: CRUD
     
     func createRacing(_ req: Request) async throws -> GonkaModel {
         guard let race = try? req.content.decode(GonkaModel.self) else {
@@ -48,4 +52,28 @@ struct GonkaController: RouteCollection {
         
     }
     
+    func deleteRace(_ req: Request) async throws -> HTTPStatus {
+        guard let race = try await GonkaModel.find(req.parameters.get("cityName"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        try await race.delete(on: req.db)
+        return .ok
+    }
+    
+    func updateRace(_ req: Request) async throws -> GonkaModel {
+        guard let race = try await GonkaModel.find(req.parameters.get("cityName"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        let updatedRace = try req.content.decode(GonkaModel.self)
+        
+        race.name = updatedRace.name
+        race.city = updatedRace.city
+        race.description = updatedRace.description
+        race.date = updatedRace.date
+        race.geo = updatedRace.geo
+        race.image = updatedRace.image
+        
+        try await race.save(on: req.db)
+        return race
+    }
 }

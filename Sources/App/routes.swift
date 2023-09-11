@@ -5,4 +5,5 @@ func routes(_ app: Application) throws {
     
     try app.register(collection: GonkaController())
     try app.register(collection: UsersController())
+    app.routes.defaultMaxBodySize = "5Mb"
 }

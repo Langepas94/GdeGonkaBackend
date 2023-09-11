@@ -22,17 +22,27 @@ struct GonkaController: RouteCollection {
         let protected = raceGroup.grouped(basicMW, guardMW)
         protected.post(use: createRacing)
         protected.delete(":cityName", use: deleteRace)
-        protected.put(":cityName", use: updateRace)
+        protected.put(":id", use: updateRace)
     }
     
     // MARK: CRUD
     
     func createRacing(_ req: Request) async throws -> GonkaModel {
-        guard let race = try? req.content.decode(GonkaModel.self) else {
-            throw Abort(.custom(code: 499, reasonPhrase: "Ошибка декодирования"))
+        
+        guard let gonkaData = try? req.content.decode(GonkaDTO.self) else {
+            throw Abort(.custom(code: 499, reasonPhrase: "Ошибка декодирования DTO"))
         }
-        try await race.save(on: req.db)
-        return race
+        
+        let gonkaID = UUID()
+        
+        let gonka = GonkaModel(id: gonkaID, name: gonkaData.name, city: gonkaData.city, description: gonkaData.description, date: gonkaData.date, geo: gonkaData.geo, image: "")
+        
+        let imagePath = req.application.directory.workingDirectory + "/Storage/Races" + "/\(gonka.id!).jpg"
+        
+        try await req.fileio.writeFile(.init(data: gonkaData.image), at: imagePath)
+        gonka.image = imagePath
+        try await gonka.save(on: req.db)
+        return gonka
     }
     
     func allRacings(_ req: Request) async throws -> [GonkaModel] {
@@ -41,7 +51,7 @@ struct GonkaController: RouteCollection {
     }
     
     func getRacesByCity(_ req: Request) async throws -> [GonkaModel] {
-     
+        
         let filteredRacings = try await GonkaModel.query(on: req.db)
             .filter(\.$city == req.parameters.get("cityName")!)
             .all()
@@ -61,7 +71,7 @@ struct GonkaController: RouteCollection {
     }
     
     func updateRace(_ req: Request) async throws -> GonkaModel {
-        guard let race = try await GonkaModel.find(req.parameters.get("cityName"), on: req.db) else {
+        guard let race = try await GonkaModel.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
         let updatedRace = try req.content.decode(GonkaModel.self)
@@ -76,4 +86,14 @@ struct GonkaController: RouteCollection {
         try await race.save(on: req.db)
         return race
     }
+}
+
+struct GonkaDTO: Content {
+    
+    var name: String
+    var city: String
+    var description: String
+    var date: String
+    var geo: String
+    var image: Data
 }
